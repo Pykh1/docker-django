@@ -1,0 +1,36 @@
+
+services:
+  django-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev  # Specify the dev-specific Dockerfile docker-compose run django-test
+
+    container_name: django-app
+    ports:
+      - "8000:8000"  # Expose Django on port 8000
+    volumes:
+      - .:/app  # Mount the current directory to /app in the container
+    environment:
+      - DEBUG=True  # Set environment variable for development
+  django-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: test-app
+    volumes:
+      - .:/app
+      - ./staticfiles:/staticfiles  # Mount static files
+      - ./mediafiles:/mediafiles  
+    command: python manage.py test
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro  # Mount nginx config
+      - ./staticfiles:/staticfiles:ro  # Serve static files
+      - ./mediafiles:/mediafiles:ro  # Serve media files
+    ports:
+      - "80:80"  # Expose port 80 for HTTP
+    depends_on:
+      django-app:
+        condition: service_started
