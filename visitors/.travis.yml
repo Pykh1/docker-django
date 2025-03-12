@@ -1,0 +1,18 @@
+language: python
+python:
+  - "3.10"
+
+services:
+  - docker
+
+env:
+  global:
+    - DJANGO_SETTINGS_MODULE=visitors.settings
+    - IMAGE_NAME=visitors # Replace with your image name
+
+before_install:
+  - pip install -r requirements.txt
+
+script:
+  - docker build -t $IMAGE_NAME .
+  - docker run -e DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE $IMAGE_NAME pytest
